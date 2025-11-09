@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Aku & Kamu — Kota Malam</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Varela+Round&family=Pacifico&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --accent:#ff5c7c;
+      --text-light:#ffffff;
+      --shadow: 0 10px 30px rgba(0,0,0,0.55);
+    }
+    html,body{height:100%;margin:0;font-family:"Varela Round",sans-serif;overflow:hidden;background:#07060a;color:var(--text-light);}
+
+    /* --- BACKGROUND KOTA (GANTI URL DI BAWAH) --- */
+    .bg-city{
+      position:fixed;inset:0;z-index:0;pointer-events:none;
+      background-image: url(https://westernrovers.com/wp-content/uploads/sites/57/2020/01/4d83b0a5-1.-tokyo-1.jpg); /* <<< ganti nanti */
+      background-size:cover;background-position:center center;
+      transform:scale(1.08);
+      filter:brightness(.78) saturate(.9);
+      transition:transform 0.9s ease;
+      will-change:transform;
+      animation: slowPan 30s linear infinite;
+    }
+    @keyframes slowPan{
+      0%{background-position:30% 50%}
+      50%{background-position:70% 50%}
+      100%{background-position:30% 50%}
+    }
+
+    /* overlay bokeh & hearts layer */
+    .overlay{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(900px 600px at 50% 30%, rgba(255,92,124,0.06), rgba(0,0,0,0.45));transition:background .9s}
+    .particles{position:fixed;inset:0;z-index:2;pointer-events:none;overflow:hidden}
+    .heart{position:absolute;font-size:18px;opacity:0;transform:translateY(0);animation:heartRise 3.6s ease-out forwards}
+    @keyframes heartRise{0%{opacity:0;transform:translateY(0) scale(.85)}10%{opacity:1}100%{opacity:0;transform:translateY(-80vh) scale(1.2)}}
+    .bokeh{position:absolute;border-radius:50%;filter:blur(12px);opacity:0;animation:bokehFloat 6s linear forwards}
+    @keyframes bokehFloat{0%{opacity:0;transform:translateY(40vh) scale(.6)}20%{opacity:.28}100%{opacity:0;transform:translateY(-40vh) scale(1.6)}}
+
+    /* slides layout */
+    #slides{position:relative;z-index:3;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center}
+    .slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:2rem;opacity:0;transform:translateY(18px) scale(.995);transition:opacity .45s ease,transform .45s ease;pointer-events:none}
+    .slide.active{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;z-index:4}
+
+    /* transparent text (no background) */
+    .card{width:min(780px,94%);padding:24px;text-align:center;background:transparent;color:var(--text-light);box-shadow:none}
+    .emoji{width:110px;height:110px;border-radius:999px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:48px;background:transparent}
+    h1.title{font-family:"Pacifico",cursive;font-size:34px;margin:6px 0;color:var(--text-light);text-shadow:var(--shadow)}
+    p.lead{font-size:17px;color:rgba(255,255,255,0.92);text-shadow:var(--shadow);margin-bottom:12px}
+
+    .percentBig{font-size:72px;font-weight:900;color:var(--accent);text-shadow: 0 12px 36px rgba(0,0,0,0.55);margin:6px 0}
+    .percentLabel{font-size:15px;color:rgba(255,255,255,0.9);margin-bottom:8px;text-shadow:var(--shadow)}
+
+    .btn{display:inline-block;padding:10px 18px;border-radius:999px;font-weight:700;cursor:pointer;border:none;outline:none;transition:transform .12s,box-shadow .12s;box-shadow:0 10px 30px rgba(0,0,0,0.45)}
+    .btn:active{transform:scale(.98)}
+    .btn-pink{background:linear-gradient(90deg,var(--accent),#ff8aa0);color:white}
+    .btn-green{background:#16a34a;color:white}
+
+    /* slider styles transparent */
+    .sliderWrap{width:86%;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:8px}
+    input[type=range]{-webkit-appearance:none;width:100%;height:8px;border-radius:999px;background:rgba(255,255,255,0.12);outline:none}
+    input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:linear-gradient(90deg,#fff,#ffd6de);box-shadow:0 6px 18px rgba(255,92,124,0.18);cursor:pointer}
+    input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:linear-gradient(90deg,#fff,#ffd6de);box-shadow:0 6px 18px rgba(255,92,124,0.18);cursor:pointer}
+
+    /* input / textarea */
+    input,textarea{width:100%;padding:10px;border:2px solid rgba(255,255,255,0.10);border-radius:10px;font-size:16px;background:transparent;color:var(--text-light);outline:none}
+    input::placeholder,textarea::placeholder{color:rgba(255,255,255,0.6)}
+    input:focus,textarea:focus{border-color:rgba(255,92,124,0.7);box-shadow:0 8px 20px rgba(255,92,124,0.06)}
+
+    /* pastel theme toggle for final area */
+    body.theme-pastel{ background:linear-gradient(180deg,#fff6f8,#fffaf0); color:#0b1220 }
+    body.theme-pastel .percentBig{color:#e11d48}
+    body.theme-pastel .lead{color:rgba(10,10,10,0.9)}
+    body.theme-pastel .overlay{background:radial-gradient(900px 600px at 50% 30%, rgba(252,165,165,0.12), rgba(255,245,240,0.06))}
+
+    @media (max-width:640px){ .percentBig{font-size:44px} .emoji{width:92px;height:92px;font-size:40px} }
+  </style>
+</head>
+<body>
+
+  <!-- BACKGROUND: ganti URL 'YOUR_BACKGROUND_IMAGE_URL' nanti -->
+  <div class="bg-city" id="bgCity"></div>
+  <div class="overlay" id="overlay"></div>
+  <div class="particles" id="particles"></div>
+
+  <!-- MUSIC: kosong (ganti YOUR_MUSIC_URL nanti) -->
+  <audio id="music" loop preload="auto">
+    <source src="musik_romantis.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- SLIDES -->
+  <div id="slides">
+    <!-- Splash -->
+    <div class="slide active" data-i="0" id="slide-0">
+      <div class="card">
+        <div class="emoji" id="splashEmoji">❤️</div>
+        <h1 class="title">Sentuh Love-nya</h1>
+        <p class="lead">Klik <strong>Mulai Sekarang</strong> untuk memulai — musik akan mulai setelah kamu klik.</p>
+        <button id="startBtn" class="btn btn-pink">Mulai Sekarang</button>
+      </div>
+    </div>
+
+    <!-- Q1 -->
+    <div class="slide" data-i="1" id="slide-1">
+      <div class="card">
+        <div class="emoji">😊</div>
+        <h1 class="title">Seberapa Baik Aku?</h1>
+        <p class="percentLabel">Geser untuk atur angka</p>
+        <div class="percentBig" id="val1">50%</div>
+        <div class="sliderWrap">
+          <input type="range" id="s1" min="0" max="100" value="50" step="1">
+        </div>
+        <div style="margin-top:16px"><button class="btn btn-pink nextBtn">Lanjut</button></div>
+      </div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="slide" data-i="2" id="slide-2">
+      <div class="card">
+        <div class="emoji">🌟</div>
+        <h1 class="title">Kamu Segalanya</h1>
+        <p class="percentLabel">Tunjukkan seberapa besar</p>
+        <div class="percentBig" id="val2">75%</div>
+        <div class="sliderWrap">
+          <input type="range" id="s2" min="0" max="100" value="75" step="1">
+        </div>
+        <div style="margin-top:16px"><button class="btn btn-pink nextBtn">Lanjut</button></div>
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="slide" data-i="3" id="slide-3">
+      <div class="card">
+        <div class="emoji">😈</div>
+        <h1 class="title">Seberapa Nakal Aku?</h1>
+        <p class="percentLabel">Atur sesuai perasaan</p>
+        <div class="percentBig" id="val3">30%</div>
+        <div class="sliderWrap">
+          <input type="range" id="s3" min="0" max="100" value="30" step="1">
+        </div>
+        <div style="margin-top:16px"><button class="btn btn-pink nextBtn">Lanjut</button></div>
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="slide" data-i="4" id="slide-4">
+      <div class="card">
+        <div class="emoji">🥺</div>
+        <h1 class="title">Seberapa Kamu Sayang Aku?</h1>
+        <p class="percentLabel">Jujur ya...</p>
+        <div class="percentBig" id="val4">99%</div>
+        <div class="sliderWrap">
+          <input type="range" id="s4" min="0" max="100" value="99" step="1">
+        </div>
+        <div style="margin-top:16px"><button class="btn btn-pink nextBtn">Lanjut</button></div>
+      </div>
+    </div>
+
+    <!-- Final inputs -->
+    <div class="slide" data-i="5" id="slide-5">
+      <div class="card">
+        <div class="emoji">💌</div>
+        <h1 class="title">Panggilan Kamu ke Aku?</h1>
+        <p class="lead">Contoh: Sayang, Beb, Ayang</p>
+        <input id="panggilan" placeholder="Masukkan panggilan sayang..." />
+        <div style="margin-top:14px"><button id="panggilanNext" class="btn btn-pink" disabled>Lanjut</button></div>
+      </div>
+    </div>
+
+    <!-- Pesan -->
+    <div class="slide" data-i="6" id="slide-6">
+      <div class="card">
+        <div class="emoji">📝</div>
+        <h1 class="title">Pesan Buat Aku?</h1>
+        <textarea id="pesan" placeholder="Tulis pesanmu..." rows="4"></textarea>
+        <div style="margin-top:14px"><button class="btn btn-pink nextBtn">Lihat Hasil</button></div>
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div class="slide" data-i="7" id="slide-7">
+      <div class="card">
+        <div class="emoji">🎉</div>
+        <h1 class="title">Yeeaayy!!</h1>
+        <p class="lead">Makasih udah jawab semuanya, <strong id="showPanggilan">Sayang</strong>!</p>
+        <pre id="summary" style="white-space:pre-wrap;text-align:left;color:rgba(255,255,255,0.95);background:none;border:none;padding:0;margin:0;"></pre>
+        <div style="margin-top:18px">
+          <button id="shareBtn" class="btn btn-green">Teruskan via WhatsApp</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+(() => {
+  // elements
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const startBtn = document.getElementById('startBtn');
+  const nextBtns = Array.from(document.querySelectorAll('.nextBtn'));
+  const music = document.getElementById('music');
+  const particles = document.getElementById('particles');
+  const bgCity = document.getElementById('bgCity');
+  const overlay = document.getElementById('overlay');
+
+  // sliders and outputs
+  const s1 = document.getElementById('s1'), v1 = document.getElementById('val1');
+  const s2 = document.getElementById('s2'), v2 = document.getElementById('val2');
+  const s3 = document.getElementById('s3'), v3 = document.getElementById('val3');
+  const s4 = document.getElementById('s4'), v4 = document.getElementById('val4');
+
+  const panggilanInput = document.getElementById('panggilan');
+  const panggilanNext = document.getElementById('panggilanNext');
+  const pesanEl = document.getElementById('pesan');
+  const showPanggilan = document.getElementById('showPanggilan');
+  const summaryEl = document.getElementById('summary');
+  const shareBtn = document.getElementById('shareBtn');
+
+  let current = 0;
+  let musicStarted = false;
+  const results = { Q1:50, Q2:75, Q3:30, Q4:99 }; // defaults
+
+  // show slide helper
+  function show(i){
+    if(i<0||i>=slides.length) return;
+    slides.forEach(s=>s.classList.remove('active'));
+    slides[i].classList.add('active');
+    current = i;
+
+    // pastel theme on final inputs/result
+    if(i >= 5){
+      document.body.classList.add('theme-pastel');
+      overlay.style.background = 'radial-gradient(900px 600px at 50% 30%, rgba(252,165,165,0.12), rgba(255,245,240,0.06))';
+      bgCity.style.filter = 'saturate(1.05) brightness(1.05)';
+    } else {
+      document.body.classList.remove('theme-pastel');
+      overlay.style.background = '';
+      bgCity.style.filter = 'saturate(.85) brightness(.85)';
+    }
+
+    // update percent text
+    if(i === 1) v1.textContent = (results.Q1||50) + '%';
+    if(i === 2) v2.textContent = (results.Q2||75) + '%';
+    if(i === 3) v3.textContent = (results.Q3||30) + '%';
+    if(i === 4) v4.textContent = (results.Q4||99) + '%';
+
+    // final summary
+    if(i === 7){
+      const pangg = panggilanInput.value.trim() || 'Sayang';
+      showPanggilan.textContent = pangg;
+      let text = `• Baik: ${results.Q1}%\n• Kamu Segalanya: ${results.Q2}%\n• Nakal: ${results.Q3}%\n• Sayang: ${results.Q4}%\n\nPanggilan: ${pangg}\nPesan: ${pesanEl.value.trim() || '(tidak ada)'}\n\n`;
+      summaryEl.textContent = text;
+    }
+  }
+
+  // start music when user interacts
+  function ensureMusic(){
+    if(!musicStarted){
+      music.play().catch(()=>{/* autoplay blocked or empty URL */});
+      musicStarted = true;
+    }
+  }
+
+  // spawn particles: bokeh + hearts
+  function spawnParticles(){
+    setInterval(()=> {
+      const b = document.createElement('div');
+      b.className = 'bokeh';
+      b.style.left = (5 + Math.random()*90) + 'vw';
+      b.style.top = (60 + Math.random()*30) + 'vh';
+      const sz = 30 + Math.random()*90;
+      b.style.width = sz + 'px';
+      b.style.height = sz + 'px';
+      b.style.background = `rgba(255, ${200 + Math.round(Math.random()*40)}, ${200 + Math.round(Math.random()*40)}, ${0.02 + Math.random()*0.06})`;
+      particles.appendChild(b);
+      setTimeout(()=> b.remove(), 6200);
+    }, 900);
+
+    setInterval(()=> {
+      const h = document.createElement('div');
+      h.className = 'heart';
+      h.textContent = ['💖','💗','💕'][Math.floor(Math.random()*3)];
+      h.style.left = (5 + Math.random()*90) + 'vw';
+      h.style.fontSize = (12 + Math.random()*26) + 'px';
+      particles.appendChild(h);
+      setTimeout(()=> h.remove(), 3800);
+    }, 1400);
+  }
+
+  // init sliders to update results real-time
+  function initSliders(){
+    s1.addEventListener('input', e => { results.Q1 = Number(e.target.value); v1.textContent = results.Q1 + '%'; });
+    s2.addEventListener('input', e => { results.Q2 = Number(e.target.value); v2.textContent = results.Q2 + '%'; });
+    s3.addEventListener('input', e => { results.Q3 = Number(e.target.value); v3.textContent = results.Q3 + '%'; });
+    s4.addEventListener('input', e => { results.Q4 = Number(e.target.value); v4.textContent = results.Q4 + '%'; });
+  }
+
+  // start button
+  startBtn.addEventListener('click', () => {
+    ensureMusic();
+    show(1);
+  });
+
+  // next buttons
+  nextBtns.forEach(btn => btn.addEventListener('click', () => {
+    ensureMusic();
+    const next = Math.min(slides.length-1, current+1);
+    show(next);
+  }));
+
+  // panggilan input validation
+  panggilanInput.addEventListener('input', e => { panggilanNext.disabled = e.target.value.trim().length === 0; });
+  panggilanNext.addEventListener('click', () => { ensureMusic(); show(6); });
+
+  // when pressing Lihat Hasil from Pesan slide, go to result
+  document.querySelectorAll('.nextBtn').forEach(btn=>{
+    btn.addEventListener('click', () => {
+      if(current === 6) show(7);
+    });
+  });
+
+  // share result via WhatsApp (share intent, no number)
+  shareBtn.addEventListener('click', () => {
+    ensureMusic();
+    const pangg = panggilanInput.value.trim() || 'Sayang';
+    const text = `Hasil Kuis dari ${pangg}:\n\n• Baik: ${results.Q1}%\n• Kamu Segalanya: ${results.Q2}%\n• Nakal: ${results.Q3}%\n• Sayang: ${results.Q4}%\n\nPanggilan: ${pangg}\nPesan: ${pesanEl.value.trim() || '(tidak ada)'}\n\nLink: YOUR_LINK_HERE`;
+    const encoded = encodeURIComponent(text);
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const shareLink = isMobile ? `https://api.whatsapp.com/send?text=${encoded}` : `https://web.whatsapp.com/send?text=${encoded}`;
+    if(confirm('Kirim hasil kuis lewat WhatsApp?')) window.open(shareLink,'_blank');
+  });
+
+  // parallax pointer move (subtle)
+  document.addEventListener('pointermove', e => {
+    const x = (e.clientX / window.innerWidth - 0.5) * 10;
+    const y = (e.clientY / window.innerHeight - 0.5) * 6;
+    bgCity.style.transform = `translate(${x}px, ${y}px) scale(1.08)`;
+  });
+
+  // init
+  slides.forEach(s=>s.classList.remove('active'));
+  show(0);
+  initSliders();
+  spawnParticles();
+})();
+</script>
+</body>
+</html>
