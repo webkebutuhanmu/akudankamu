@@ -325,7 +325,7 @@
   shareBtn.addEventListener('click', () => {
     ensureMusic();
     const pangg = panggilanInput.value.trim() || 'Sayang';
-    const text = `Hasil Kuis dari ${pangg}:\n\n• Baik: ${results.Q1}%\n• Kamu Segalanya: ${results.Q2}%\n• Nakal: ${results.Q3}%\n• Sayang: ${results.Q4}%\n\nPanggilan: ${pangg}\nPesan: ${pesanEl.value.trim() || '(tidak ada)'}\n\nLink: YOUR_LINK_HERE`;
+    const text = `Hasil Kuis dari ${pangg}:\n\n• Baik: ${results.Q1}%\n• Kamu Segalanya: ${results.Q2}%\n• Nakal: ${results.Q3}%\n• Sayang: ${results.Q4}%\n\nPanggilan: ${pangg}\nPesan: ${pesanEl.value.trim() || '(tidak ada)'}\n\n`;
     const encoded = encodeURIComponent(text);
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     const shareLink = isMobile ? `https://api.whatsapp.com/send?text=${encoded}` : `https://web.whatsapp.com/send?text=${encoded}`;
@@ -348,3 +348,4 @@
 </script>
 </body>
 </html>
+
